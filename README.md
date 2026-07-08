@@ -1,4 +1,4 @@
-<img width="1918" height="1073" alt="image" src="https://github.com/user-attachments/assets/4b0d68a8-30d1-4569-af5d-bfece5e74ede" /># Rate Drift
+# Rate Drift
 
 A tiny, live currency-movement tool built for the five-day build challenge.
 
