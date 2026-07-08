@@ -6,7 +6,7 @@ A tiny, live currency-movement tool built for the five-day build challenge.
 
 **Live link:** [add your GitHub Pages URL here after deploying]
 
-## Why Option 1
+## Why I chose Option 1
 The brief says the difficulty weight only ever helps and never rescues an unfinished submission — so with about a day of runway, I picked the option I could finish to a genuinely high bar rather than the one with the biggest multiplier. Option 1 (API tool) has one clean data dependency, no schema or graph modeling to get subtly wrong (Option 2), no evaluation set to build and validate (Option 3), and no multi-dimension scoring rubric to justify against sources (Option 4). It maps directly onto every scoring dimension in the brief — shipped, interactive, grounded, cited, explainable, finished — without extra moving parts that could break the night before a deadline.
 
 ## What it does
