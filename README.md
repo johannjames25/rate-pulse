@@ -2,7 +2,7 @@
 
 A tiny, live currency-movement tool built for the five-day build challenge.
 
-**Option chosen:** Option 1 — API Tool + Chat/Form (weight ×1.00)
+**Option chosen:** Option 1 : API Tool + Chat/Form (weight ×1.00)
 
 **Live link:** [add your GitHub Pages URL here after deploying]
 
