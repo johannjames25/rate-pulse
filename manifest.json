@@ -1,0 +1,14 @@
+{
+  "name": "Rate Drift — ECB Currency Movement",
+  "short_name": "Rate Drift",
+  "description": "Live currency conversion and movement checker, sourced from the European Central Bank via the Frankfurter API.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eceee7",
+  "theme_color": "#28395c",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
