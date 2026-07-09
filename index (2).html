@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RatePulse — a plain-language currency slip</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3d6c8c">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1e212a;
+    --ink-soft:#1e212a92;
+    --ink-faint:#1e212a55;
+    --paper:#f2ede3;
+    --card:#faf7f1;
+    --line:#1e212a22;
+    --line-strong:#1e212a3c;
+    --orange:#c45c30;
+    --orange-soft:#c45c3014;
+    --blue:#3d6c8c;
+    --blue-soft:#3d6c8c14;
+    --indigo:#3d6c8c;
+    --indigo-deep:#2c5069;
+    --indigo-soft:#3d6c8c14;
+    --stamp:#b0452a;
+    --stamp-soft:#b0452a10;
+    --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+    --serif: 'Fraunces', Georgia, serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 12% 8%, #ffffff30, transparent 40%),
+      radial-gradient(circle at 92% 88%, #00000008, transparent 45%),
+      var(--paper);
+    color:var(--ink);
+    font-family:var(--mono);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:940px;margin:0 auto;padding:40px 20px 90px;}
+
+  .masthead{
+    display:flex;justify-content:space-between;align-items:flex-end;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:16px;margin-bottom:6px;
+    flex-wrap:wrap;gap:10px;
+  }
+  .brand{display:flex;align-items:baseline;gap:12px;}
+  h1{
+    font-family:var(--serif);font-size:38px;line-height:1;margin:0;
+    font-weight:700;letter-spacing:-0.01em;font-optical-sizing:auto;
+  }
+  .tag{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);border-left:2px solid var(--orange);padding-left:10px;}
+  .tagline{display:flex;gap:8px;align-items:center;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);margin:10px 0 26px;}
+  .tagline .dot{width:5px;height:5px;border-radius:50%;display:inline-block;}
+  .dot-orange{background:var(--orange);}
+  .dot-blue{background:var(--blue);}
+  .today{font-size:11px;color:var(--ink-soft);text-align:right;letter-spacing:.02em;}
+  .today b{color:var(--ink);}
+  .sub{font-size:13.5px;color:var(--ink-soft);max-width:70ch;margin:0 0 26px;}
+
+  .layout{display:grid;grid-template-columns:300px 1fr;gap:22px;align-items:start;}
+  @media (max-width: 760px){.layout{grid-template-columns:1fr;}}
+
+  .panel{background:var(--card);border:1px solid var(--line-strong);}
+  .panel-head{
+    font-family:var(--serif);font-size:12.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
+    padding:14px 18px;border-bottom:1px solid var(--line);background:var(--indigo-soft);
+  }
+  .panel-body{padding:18px;}
+
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:15px;}
+  .field label{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);}
+  input[type=number], select{
+    font-family:var(--mono);font-size:15px;padding:10px 10px;border:1px solid var(--line-strong);
+    background:#fff;color:var(--ink);border-radius:0;width:100%;
+  }
+  input[type=number]:focus, select:focus{outline:2px solid var(--indigo);outline-offset:1px;}
+  .pairrow{display:flex;gap:10px;}
+  .pairrow .field{flex:1;}
+
+  button{
+    font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.05em;
+    background:linear-gradient(90deg, var(--orange), var(--blue));color:#faf7f1;border:none;padding:13px 22px;
+    cursor:pointer;text-transform:uppercase;border-radius:0;width:100%;margin-top:4px;
+  }
+  button:hover{filter:brightness(0.92);}
+  button:disabled{background:#1e212a3a;cursor:wait;filter:none;}
+  .loading{font-size:12px;color:var(--ink-soft);margin-top:12px;display:none;}
+  .loading.show{display:block;}
+  .error{background:#f3e3df;border:1px solid var(--stamp);color:var(--stamp);padding:11px 13px;font-size:12.5px;margin-top:12px;display:none;}
+  .error.show{display:block;}
+
+  .ticket{background:var(--card);border:1px solid var(--line-strong);position:relative;min-height:220px;}
+  .ticket-empty{
+    padding:60px 24px;text-align:center;color:var(--ink-faint);font-size:13px;
+    display:flex;align-items:center;justify-content:center;height:100%;min-height:220px;
+  }
+  .ticket-content{display:none;}
+  .ticket-content.show{display:block;}
+  .perf{height:1px;background-image:repeating-linear-gradient(90deg, var(--line-strong) 0 7px, transparent 7px 14px);}
+  .ticket-head{padding:20px 24px 4px;}
+  .eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);}
+  .totalrow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:6px 0 4px;}
+  .totalfig{font-family:var(--serif);font-size:38px;font-weight:700;color:var(--indigo);letter-spacing:-0.01em;}
+  .totalcur{font-family:var(--serif);font-size:16px;color:var(--ink-soft);}
+  .direction{
+    display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;
+    padding:3px 9px;letter-spacing:.03em;
+  }
+  .dir-up{background:#e2ebe2;color:#2c5c38;}
+  .dir-down{background:#f3e3df;color:var(--stamp);}
+  .dir-flat{background:var(--indigo-soft);color:var(--indigo);}
+  .headline{font-size:13px;color:var(--ink-soft);margin:10px 0 0;line-height:1.6;}
+
+  .ticket-body{padding:18px 24px 6px;}
+  .tline{display:flex;align-items:baseline;gap:8px;margin-bottom:10px;}
+  .tline .lbl{white-space:nowrap;font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;}
+  .tline .dots{flex:1;border-bottom:1px dotted var(--line-strong);position:relative;top:-4px;}
+  .tline .val{white-space:nowrap;font-size:13.5px;font-weight:600;}
+
+  .working{margin:14px 24px 4px;padding:13px 15px;background:var(--stamp-soft);border-left:2px solid var(--stamp);font-size:12px;display:none;}
+  .working.show{display:block;}
+  .working .wt{font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--stamp);font-weight:600;margin-bottom:7px;}
+  .working code{background:#fff;padding:1px 4px;font-family:var(--mono);border:1px solid var(--line);}
+
+  .ticket-foot{padding:16px 24px 20px;}
+  .barcode{
+    height:30px;
+    background-image:repeating-linear-gradient(90deg,
+      var(--ink) 0 1px, transparent 1px 3px,
+      var(--ink) 3px 5px, transparent 5px 6px,
+      var(--ink) 6px 8px, transparent 8px 11px,
+      var(--ink) 11px 12px, transparent 12px 15px);
+    opacity:.82;
+  }
+  .serial{font-size:9.5px;color:var(--ink-faint);letter-spacing:.08em;margin-top:6px;text-align:center;}
+
+  footer{margin-top:28px;font-size:11.5px;color:var(--ink-soft);border-top:1px solid var(--line);padding-top:16px;}
+  footer a{color:var(--indigo);}
+  footer p{margin:0 0 8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="masthead">
+    <div class="brand">
+      <h1>RatePulse</h1>
+      <span class="tag">ECB sourced · no key required</span>
+    </div>
+    <div class="today">Terminal date<br /><b id="todayLabel"></b></div>
+  </div>
+  <div class="tagline"><span class="dot dot-orange"></span>Track<span class="dot dot-blue"></span>Compare<span class="dot dot-orange"></span>Convert</div>
+  <p class="sub">Type a currency pair and an amount. This looks up today's official reference rate, compares it to the rate from earlier, and states — in one plain sentence — what actually happened. Not a raw number, not a JSON blob.</p>
+
+  <div class="layout">
+    <div class="panel">
+      <div class="panel-head">Check a pair</div>
+      <div class="panel-body">
+        <div class="field">
+          <label>Amount</label>
+          <input type="number" id="amount" min="0" step="any" value="100">
+        </div>
+        <div class="pairrow">
+          <div class="field">
+            <label style="color:var(--orange)">From</label>
+            <select id="from"></select>
+          </div>
+          <div class="field">
+            <label style="color:var(--blue)">To</label>
+            <select id="to"></select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Compare to</label>
+          <select id="lookback">
+            <option value="7">7 days ago</option>
+            <option value="30" selected>30 days ago</option>
+            <option value="90">90 days ago</option>
+          </select>
+        </div>
+        <button id="go">Check rate</button>
+        <p class="loading" id="loading">Fetching from the ECB's daily rates via Frankfurter…</p>
+        <div class="error" id="error"></div>
+      </div>
+    </div>
+
+    <div class="ticket">
+      <div class="ticket-empty" id="ticketEmpty">Your rate slip will print here once you check a pair.</div>
+      <div class="ticket-content" id="ticketContent">
+        <div class="ticket-head">
+          <div class="eyebrow" id="eyebrow"></div>
+          <div class="totalrow">
+            <span class="totalfig" id="totalfig"></span>
+            <span class="totalcur" id="totalcur"></span>
+            <span class="direction" id="directionBadge"></span>
+          </div>
+          <p class="headline" id="headline"></p>
+        </div>
+        <div class="perf"></div>
+        <div class="ticket-body">
+          <div class="tline"><span class="lbl">Today's rate</span><span class="dots"></span><span class="val" id="valRate"></span></div>
+          <div class="tline"><span class="lbl">Rate lookback ago</span><span class="dots"></span><span class="val" id="valPastDate"></span></div>
+          <div class="tline"><span class="lbl">Latest rate as of</span><span class="dots"></span><span class="val" id="valTodayDate"></span></div>
+        </div>
+        <div class="working" id="working">
+          <div class="wt">How this number is actually calculated</div>
+          <div id="workingBody"></div>
+        </div>
+        <div class="perf"></div>
+        <div class="ticket-foot">
+          <div class="barcode"></div>
+          <div class="serial" id="serial"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>
+      Rates come from the <a href="https://frankfurter.dev/v1/" target="_blank" rel="noopener">Frankfurter v1 API</a>,
+      a free, keyless service that redistributes the European Central Bank's daily reference rates. The ECB only
+      publishes rates against the euro — so any pair not involving EUR is a cross-rate, computed by dividing one
+      euro rate by another, shown above under "how this number is calculated."
+    </p>
+    <p>
+      No rate is published on weekends or ECB holidays; the tool always shows the actual date used, not the date
+      you asked for. Educational tool, not financial advice — see the Citation Ledger in the repo for full sourcing.
+    </p>
+  </footer>
+</div>
+
+<script>
+const CURRENCIES = ["USD","EUR","GBP","INR","JPY","AUD","CAD","CHF","CNY","SGD","AED","ZAR","BRL"];
+const fromSel = document.getElementById('from');
+const toSel = document.getElementById('to');
+CURRENCIES.forEach(c => {
+  fromSel.appendChild(new Option(c, c));
+  toSel.appendChild(new Option(c, c));
+});
+fromSel.value = "USD";
+toSel.value = "INR";
+
+document.getElementById('todayLabel').textContent = new Date().toLocaleDateString(undefined, { weekday: "short", year: "numeric", month: "short", day: "numeric" });
+
+const goBtn = document.getElementById('go');
+const loading = document.getElementById('loading');
+const errorBox = document.getElementById('error');
+const ticketEmpty = document.getElementById('ticketEmpty');
+const ticketContent = document.getElementById('ticketContent');
+const workingBox = document.getElementById('working');
+
+function fmt(n, digits = 4) {
+  return Number(n).toLocaleString(undefined, { maximumFractionDigits: digits });
+}
+function daysAgoISO(n) {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d.toISOString().slice(0, 10);
+}
+async function fetchJSON(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('fetch-failed');
+  return res.json();
+}
+async function fetchRate(dateStr, from, to) {
+  const url = `https://api.frankfurter.dev/v1/${dateStr}?base=${from}&symbols=${to}`;
+  const data = await fetchJSON(url);
+  if (!data || !data.rates || typeof data.rates[to] !== 'number') throw new Error('no-data');
+  return { rate: data.rates[to], date: data.date };
+}
+
+async function run() {
+  errorBox.classList.remove('show');
+  ticketContent.classList.remove('show');
+  ticketEmpty.style.display = 'none';
+  workingBox.classList.remove('show');
+
+  const amount = parseFloat(document.getElementById('amount').value);
+  const from = fromSel.value;
+  const to = toSel.value;
+  const lookbackDays = parseInt(document.getElementById('lookback').value, 10);
+
+  if (from === to) {
+    errorBox.textContent = `Pick two different currencies — ${from} to ${from} is always 1:1, there's nothing to check.`;
+    errorBox.classList.add('show');
+    ticketEmpty.style.display = 'flex';
+    return;
+  }
+  if (!amount || amount <= 0 || isNaN(amount)) {
+    errorBox.textContent = "Enter an amount greater than 0.";
+    errorBox.classList.add('show');
+    ticketEmpty.style.display = 'flex';
+    return;
+  }
+
+  goBtn.disabled = true;
+  loading.classList.add('show');
+
+  try {
+    const todayResult = await fetchRate('latest', from, to);
+    const pastDate = daysAgoISO(lookbackDays);
+    const pastResult = await fetchRate(pastDate, from, to);
+
+    const converted = amount * todayResult.rate;
+    const pctChange = ((todayResult.rate - pastResult.rate) / pastResult.rate) * 100;
+    const direction = pctChange > 0.005 ? "strengthened" : (pctChange < -0.005 ? "weakened" : "held roughly steady");
+    const arrow = pctChange > 0.005 ? "▲" : (pctChange < -0.005 ? "▼" : "→");
+    const dirClass = pctChange > 0.005 ? "dir-up" : (pctChange < -0.005 ? "dir-down" : "dir-flat");
+
+    document.getElementById('eyebrow').textContent = `${amount} ${from} converts to`;
+    document.getElementById('totalfig').textContent = fmt(converted, 2);
+    document.getElementById('totalcur').textContent = to;
+    const badge = document.getElementById('directionBadge');
+    badge.className = `direction ${dirClass}`;
+    badge.textContent = `${arrow} ${fmt(Math.abs(pctChange), 2)}% vs ${lookbackDays}d ago`;
+    document.getElementById('headline').innerHTML = `${from} has <b>${direction}</b> against ${to} over the past ${lookbackDays} days.`;
+
+    document.getElementById('valRate').textContent = `1 ${from} = ${fmt(todayResult.rate)} ${to}`;
+    document.getElementById('valPastDate').textContent = pastResult.date;
+    document.getElementById('valTodayDate').textContent = todayResult.date;
+    document.getElementById('serial').textContent = `RP·${from}${to}·${todayResult.date.replaceAll('-', '')}`;
+
+    ticketContent.classList.add('show');
+
+    if (from !== 'EUR' && to !== 'EUR') {
+      try {
+        const eurBase = await fetchJSON(`https://api.frankfurter.dev/v1/latest?base=EUR&symbols=${from},${to}`);
+        const eurToFrom = eurBase.rates[from];
+        const eurToTo = eurBase.rates[to];
+        const recomputed = eurToTo / eurToFrom;
+        workingBox.classList.add('show');
+        document.getElementById('workingBody').innerHTML =
+          `The ECB doesn't publish ${from}→${to} directly — it only publishes rates against EUR. ` +
+          `So the API (and this tool) derives it: <code>1 EUR = ${fmt(eurToFrom)} ${from}</code> and ` +
+          `<code>1 EUR = ${fmt(eurToTo)} ${to}</code>, giving <code>1 ${from} = ${fmt(recomputed)} ${to}</code> — ` +
+          `matching the ${fmt(todayResult.rate)} shown above (small gaps are just rounding at each step).`;
+      } catch (e) {
+        // non-critical — main result already stands
+      }
+    } else {
+      workingBox.classList.add('show');
+      document.getElementById('workingBody').innerHTML =
+        `${from === 'EUR' ? to : from} is quoted directly against EUR by the ECB, so no triangulation is needed here — this is a direct published rate.`;
+    }
+  } catch (err) {
+    errorBox.textContent = "Couldn't get rate data for that combination right now — the API may be briefly unavailable, or one of these currencies isn't covered. Try again in a moment, or pick a different pair.";
+    errorBox.classList.add('show');
+    ticketEmpty.style.display = 'flex';
+  } finally {
+    goBtn.disabled = false;
+    loading.classList.remove('show');
+  }
+}
+
+goBtn.addEventListener('click', run);
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
