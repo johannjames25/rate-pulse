@@ -2,12 +2,9 @@
 
 A tiny, live currency-movement tool built for the five-day build challenge.
 
-**Option picked:** Option 1 — API Tool + Chat/Form (weight ×1.00)
+**Option chosen:** Option 1 — API Tool + Chat/Form (weight ×1.00)
 
 **Live link:** [add your GitHub Pages URL here after deploying]
-
-## Why Option 1
-The brief says the difficulty weight only ever helps and never rescues an unfinished submission — so with about a day of runway, I picked the option I could finish to a genuinely high bar rather than the one with the biggest multiplier. Option 1 (API tool) has one clean data dependency, no schema or graph modeling to get subtly wrong (Option 2), no evaluation set to build and validate (Option 3), and no multi-dimension scoring rubric to justify against sources (Option 4). It maps directly onto every scoring dimension in the brief — shipped, interactive, grounded, cited, explainable, finished — without extra moving parts that could break the night before a deadline.
 
 ## What it does
 You enter an amount and pick a "from" and "to" currency. The tool:
@@ -19,9 +16,6 @@ You enter an amount and pick a "from" and "to" currency. The tool:
 
 It also handles a couple of edge cases gracefully: picking the same currency twice, entering an invalid amount, and the API being briefly unreachable or missing data for a date.
 
-## Why this data source
-Frankfurter is free, requires no API key, and is CORS-enabled, so the whole tool runs client-side as a single `index.html` — no backend, no server costs, no secrets to leak. It redistributes official ECB reference rates, which are cited (with the exact pages checked) in `CITATIONS.md`.
-
 ## What I cut and why
 - **No historical chart.** A line chart would make the trend easier to see at a glance, but it adds a charting dependency and more edge cases (missing days, axis scaling) than I could finish cleanly in the time budget. A single stated percentage change gets the same core insight across reliably.
 - **Fixed currency list (13 currencies) instead of the full ~30 Frankfurter supports.** I kept the dropdown to the currencies most people would actually ask about, to keep the UI simple rather than exhaustive.
@@ -31,7 +25,7 @@ Frankfurter is free, requires no API key, and is CORS-enabled, so the whole tool
 The app is installable: it ships a `manifest.json` and a service worker (`sw.js`) that caches only the static shell (HTML, fonts config, icons) so it can be added to a phone or desktop home screen and opens instantly. It deliberately never caches the exchange-rate API calls — rates must always come from the live network, never from a stale cache, or the tool would silently show wrong numbers.
 
 ## Files in this repo
-- `index.html` — the artifact + live front-end (React, loaded via CDN — no build step required)
+- `index.html` — the artifact + live front-end (React, loaded via CDN)
 - `manifest.json` — PWA manifest (name, icons, theme colors, install behavior)
 - `sw.js` — service worker (offline app shell only, live rates always)
 - `icons/icon-192.png`, `icons/icon-512.png` — app icons
