@@ -1,4 +1,4 @@
-# Citation Ledger — Rate Drift
+# Citation Ledger — RatePulse
 
 One row per factual claim the tool or its documentation makes. All links were opened and checked on 2026-07-08.
 
